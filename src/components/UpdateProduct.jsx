@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import axios from "../axios";
 
 const UpdateProduct = () => {
   const { id } = useParams();
@@ -22,17 +22,22 @@ const UpdateProduct = () => {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/product/${id}`
+          `/product/${id}`
         );
 
         setProduct(response.data);
       
-        const responseImage = await axios.get(
-          `http://localhost:8080/api/product/${id}/image`,
-          { responseType: "blob" }
-        );
-       const imageFile = await converUrlToFile(responseImage.data,response.data.imageName)
-        setImage(imageFile);     
+        if (response.data.imageName) {
+          const responseImage = await axios.get(
+            `/product/${id}/image`,
+            { responseType: "blob" }
+          );
+          const imageFile = await converUrlToFile(
+            responseImage.data,
+            response.data.imageName
+          );
+          setImage(imageFile);
+        }
         setUpdateProduct(response.data);
       } catch (error) {
         console.error("Error fetching product:", error);

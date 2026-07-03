@@ -17,8 +17,11 @@ const Product = () => {
       try {
         const response = await axios.get(`/product/${id}`);
         setProduct(response.data);
+
         if (response.data.imageName) {
           await fetchImage();
+        } else {
+          setImageUrl("https://via.placeholder.com/300x180?text=No+Image");
         }
       } catch (error) {
         console.error("Error fetching product:", error);
@@ -37,7 +40,7 @@ const Product = () => {
 
   const deleteProduct = async () => {
     try {
-      await axios.delete(`http://localhost:8080/api/product/${id}`);
+      await axios.delete(`/product/${id}`);
       removeFromCart(id);
       console.log("Product deleted successfully");
       alert("Product deleted successfully");

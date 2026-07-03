@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import axios from "../axios";
 import AppContext from "../Context/Context";
 
 const Home = ({ selectedCategory }) => {
@@ -18,11 +18,18 @@ const Home = ({ selectedCategory }) => {
   useEffect(() => {
     if (data && data.length > 0) {
       const fetchImagesAndUpdateProducts = async () => {
+        const placeholderImage =
+          "https://via.placeholder.com/300x180?text=No+Image";
+
         const updatedProducts = await Promise.all(
           data.map(async (product) => {
+            if (!product.imageName) {
+              return { ...product, imageUrl: placeholderImage };
+            }
+
             try {
               const response = await axios.get(
-                `http://localhost:8080/api/products/product/${product.id}/image`,
+                `/product/${product.id}/image`,
                 { responseType: "blob" }
               );
               const imageUrl = URL.createObjectURL(response.data);
@@ -33,7 +40,7 @@ const Home = ({ selectedCategory }) => {
                 product.id,
                 error
               );
-              return { ...product, imageUrl: "placeholder-image-url" };
+              return { ...product, imageUrl: placeholderImage };
             }
           })
         );

@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import AppContext from "../Context/Context";
-import axios from "axios";
+import axios from "../axios";
 import CheckoutPopup from "./CheckoutPopup.jsx";
 import { Button } from 'react-bootstrap';
 
@@ -15,28 +15,32 @@ const Cart = () => {
     const fetchImagesAndUpdateCart = async () => {
       console.log("Cart", cart);
       try {
-        const response = await axios.get("http://localhost:8080/api/products");
+        const response = await axios.get("/products");
         const backendProductIds = response.data.map((product) => product.id);
+        const placeholderImage =
+          "https://via.placeholder.com/150x150?text=No+Image";
 
         const updatedCartItems = cart.filter((item) => backendProductIds.includes(item.id));
         const cartItemsWithImages = await Promise.all(
           updatedCartItems.map(async (item) => {
+            if (!item.imageName) {
+              return { ...item, imageUrl: placeholderImage };
+            }
+
             try {
               const response = await axios.get(
-                `http://localhost:8080/api/products/product/${item.id}/image`,
+                `/product/${item.id}/image`,
                 { responseType: "blob" }
               );
-              const imageFile = await converUrlToFile(response.data, response.data.imageName);
-              setCartImage(imageFile)
               const imageUrl = URL.createObjectURL(response.data);
               return { ...item, imageUrl };
             } catch (error) {
               console.error("Error fetching image:", error);
-              return { ...item, imageUrl: "placeholder-image-url" };
+              return { ...item, imageUrl: placeholderImage };
             }
           })
         );
-        console.log("cart",cart)
+        console.log("cart", cart);
         setCartItems(cartItemsWithImages);
       } catch (error) {
         console.error("Error fetching product data:", error);
@@ -108,7 +112,7 @@ const Cart = () => {
         );
   
         await axios
-          .put(`http://localhost:8080/api/product/${item.id}`, cartProduct, {
+          .put(`/product/${item.id}`, cartProduct, {
             headers: {
               "Content-Type": "multipart/form-data",
             },
