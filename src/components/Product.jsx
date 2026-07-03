@@ -3,7 +3,7 @@ import { useContext, useEffect } from "react";
 import { useState } from "react";
 import AppContext from "../Context/Context";
 import axios from "../axios";
-import UpdateProduct from "./UpdateProduct";
+// import UpdateProduct from "./UpdateProduct";
 const Product = () => {
   const { id } = useParams();
   const { data, addToCart, removeFromCart, cart, refreshData } =
@@ -15,12 +15,10 @@ const Product = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/api/product/${id}`
-        );
+        const response = await axios.get(`/product/${id}`);
         setProduct(response.data);
         if (response.data.imageName) {
-          fetchImage();
+          await fetchImage();
         }
       } catch (error) {
         console.error("Error fetching product:", error);
@@ -28,10 +26,9 @@ const Product = () => {
     };
 
     const fetchImage = async () => {
-      const response = await axios.get(
-        `http://localhost:8080/api/product/${id}/image`,
-        { responseType: "blob" }
-      );
+      const response = await axios.get(`/product/${id}/image`, {
+        responseType: "blob",
+      });
       setImageUrl(URL.createObjectURL(response.data));
     };
 
@@ -87,12 +84,12 @@ const Product = () => {
             <span>{"$" + product.price}</span>
             <button
               className={`cart-btn ${
-                !product.productAvailable ? "disabled-btn" : ""
+                !product.available ? "disabled-btn" : ""
               }`}
               onClick={handlAddToCart}
-              disabled={!product.productAvailable}
+              disabled={!product.available}
             >
-              {product.productAvailable ? "Add to cart" : "Out of Stock"}
+              {product.available ? "Add to cart" : "Out of Stock"}
             </button>
             <h6>
               Stock Available :{" "}
@@ -105,7 +102,7 @@ const Product = () => {
               <i> {new Date(product.releaseDate).toLocaleDateString()}</i>
             </p>
           </div>
-          <div className="update-button ">
+          {/* <div className="update-button ">
             <button
               className="btn btn-primary"
               type="button"
@@ -113,7 +110,7 @@ const Product = () => {
             >
               Update
             </button>
-            {/* <UpdateProduct product={product} onUpdate={handleUpdate} /> */}
+        
             <button
               className="btn btn-primary"
               type="button"
@@ -121,7 +118,7 @@ const Product = () => {
             >
               Delete
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </>

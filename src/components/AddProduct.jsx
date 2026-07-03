@@ -5,12 +5,12 @@ const AddProduct = () => {
   const [product, setProduct] = useState({
     name: "",
     brand: "",
-    description: "",
+    desc: "",
     price: "",
     category: "",
     stockQuantity: "",
     releaseDate: "",
-    productAvailable: false,
+    available: false,
   });
   const [image, setImage] = useState(null);
 
@@ -26,26 +26,53 @@ const AddProduct = () => {
 
   const submitHandler = (event) => {
     event.preventDefault();
+
+    if (!image) {
+      alert("Please select an image before submitting.");
+      return;
+    }
+
+    if (
+      !product.name.trim() ||
+      !product.brand.trim() ||
+      !product.desc.trim() ||
+      !product.price ||
+      !product.category ||
+      !product.stockQuantity ||
+      !product.releaseDate
+    ) {
+      alert("Please fill in all required fields before submitting.");
+      return;
+    }
+
+    const productPayload = {
+      ...product,
+      price: Number(product.price),
+      stockQuantity: Number(product.stockQuantity),
+      releaseDate: product.releaseDate,
+    };
+
     const formData = new FormData();
-    formData.append("imageFile", image);
+    formData.append("imageFile", image, image.name);
     formData.append(
       "product",
-      new Blob([JSON.stringify(product)], { type: "application/json" })
+      new Blob([JSON.stringify(productPayload)], { type: "application/json" })
     );
 
+    console.log("Submitting product", productPayload, image);
+
     axios
-      .post("http://localhost:8080/api/product", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
+      .post("http://localhost:8080/api/products/product", formData)
       .then((response) => {
         console.log("Product added successfully:", response.data);
         alert("Product added successfully");
       })
       .catch((error) => {
-        console.error("Error adding product:", error);
-        alert("Error adding product");
+        console.error("Error adding product:", error.response || error);
+        alert(
+          "Error adding product: " +
+            (error.response?.data?.message || error.message)
+        );
       });
   };
 
@@ -88,10 +115,10 @@ const AddProduct = () => {
             type="text"
             className="form-control"
             placeholder="Add product description"
-            value={product.description}
-            name="description"
+            value={product.desc}
+            name="desc"
             onChange={handleInputChange}
-            id="description"
+            id="desc"
           />
         </div>
         <div className="col-5">
@@ -167,7 +194,7 @@ const AddProduct = () => {
           <input
             className="form-control"
             type="file"
-            onChange={handleImageChange}
+            onChange={(e) => setImage(e.target.files[0])}
           />
         </div>
         <div className="col-12">
@@ -175,11 +202,11 @@ const AddProduct = () => {
             <input
               className="form-check-input"
               type="checkbox"
-              name="productAvailable"
+              name="available"
               id="gridCheck"
-              checked={product.productAvailable}
+              checked={product.available}
               onChange={(e) =>
-                setProduct({ ...product, productAvailable: e.target.checked })
+                setProduct({ ...product, available: e.target.checked })
               }
             />
             <label className="form-check-label">Product Available</label>
